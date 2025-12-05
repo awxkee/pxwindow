@@ -1,0 +1,19 @@
+[package]
+name = "pxwindow"
+version = "0.1.0"
+edition = "2024"
+description = "Discrete cosine transform"
+readme = "README.md"
+keywords = ["windows", "dsp"]
+license = "BSD-3-Clause OR Apache-2.0"
+authors = ["Radzivon Bartoshyk"]
+documentation = "https://github.com/awxkee/pxwindow"
+categories = ["algorithms", "science"]
+homepage = "https://github.com/awxkee/pxwindow"
+repository = "https://github.com/awxkee/pxwindow"
+exclude = ["*.jpg", "/assets", "*.png", "*.sh", "/assets/*"]
+rust-version = "1.87.0"
+
+[dependencies]
+pxfm = "^0.1.26"
+num-traits = "0.2.19"
