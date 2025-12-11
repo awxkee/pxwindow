@@ -27,7 +27,8 @@
  * // OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 use crate::Trigonometry;
-use num_traits::{AsPrimitive, Float, Signed};
+use crate::mla::fmla;
+use num_traits::{AsPrimitive, Float, MulAdd, Signed};
 use std::ops::{Div, Mul, Sub};
 
 #[inline(always)]
@@ -39,7 +40,8 @@ pub(crate) fn hann_impl<
         + Sub<Output = V>
         + Float
         + 'static
-        + Trigonometry<V>,
+        + Trigonometry<V>
+        + MulAdd<V, Output = V>,
 >(
     len: usize,
 ) -> Vec<V>
@@ -59,7 +61,7 @@ where
 
     for (n, dst) in w.iter_mut().enumerate() {
         let r: V = (2.0f64.as_() * n.as_()) * denom;
-        let v = 0.5f64.as_() * (1.0f64.as_() - r.cospi());
+        let v = fmla(-r.cospi(), 0.5f64.as_(), 0.5f64.as_());
         *dst = v;
     }
 
