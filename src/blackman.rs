@@ -26,25 +26,12 @@
  * // OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
  * // OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
-use crate::Trigonometry;
+use crate::WindowSample;
 use crate::mla::fmla;
-use num_traits::{AsPrimitive, Float, MulAdd, Signed};
-use std::ops::{Div, Mul, Sub};
+use num_traits::AsPrimitive;
 
 #[inline(always)]
-pub(crate) fn blackman_impl<
-    V: Copy
-        + Mul<Output = V>
-        + Div<Output = V>
-        + Signed
-        + Sub<Output = V>
-        + Float
-        + 'static
-        + Trigonometry<V>
-        + MulAdd<V, Output = V>,
->(
-    len: usize,
-) -> Vec<V>
+pub(crate) fn blackman_impl<V: WindowSample>(len: usize) -> Vec<V>
 where
     f64: AsPrimitive<V>,
     usize: AsPrimitive<V>,

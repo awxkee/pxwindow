@@ -1,5 +1,5 @@
 /*
- * // Copyright (c) Radzivon Bartoshyk 12/2025. All rights reserved.
+ * // Copyright (c) Radzivon Bartoshyk 3/2026. All rights reserved.
  * //
  * // Redistribution and use in source and binary forms, with or without modification,
  * // are permitted provided that the following conditions are met:
@@ -30,27 +30,27 @@ use crate::WindowSample;
 use crate::mla::fmla;
 use num_traits::AsPrimitive;
 
-#[inline(always)]
-pub(crate) fn hamming_impl<V: WindowSample>(len: usize) -> Vec<V>
+pub(crate) fn kaiser_impl<V: WindowSample>(len: usize, beta: V) -> Vec<V>
 where
     f64: AsPrimitive<V>,
-    usize: AsPrimitive<V>,
 {
-    assert!(len > 0, "Windows of size 0 is not defined");
+    let mut v = vec![V::zero(); len];
 
-    let mut w = vec![V::zero(); len];
+    let i0_beta = V::one() / beta.i0();
 
-    if len == 1 {
-        return vec![1f64.as_()];
+    for (i, dst) in v.iter_mut().enumerate() {
+        let k = (2.0 * i as f64 / (len - 1) as f64 - 1.0).as_();
+        let term = fmla(-k, k, V::one());
+
+        // Compute the window value
+        let w_val = if term > V::zero() {
+            (beta * term.sqrt()).i0() * i0_beta
+        } else {
+            V::zero()
+        };
+
+        *dst = w_val;
     }
 
-    let denom: V = (1. / (len - 1) as f64).as_();
-
-    for (n, dst) in w.iter_mut().enumerate() {
-        let r: V = (2.0f64.as_() * n.as_()) * denom;
-        let v = fmla(-0.46f64.as_(), r.cospi(), 0.54f64.as_());
-        *dst = v;
-    }
-
-    w
+    v
 }

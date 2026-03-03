@@ -29,12 +29,37 @@
 use crate::blackman::blackman_impl;
 use crate::hamming::hamming_impl;
 use crate::hann::hann_impl;
-use pxfm::{f_cospi, f_cospif};
+use crate::kaiser::kaiser_impl;
+use crate::slepian::slepian_window;
+use num_traits::{Float, MulAdd, Signed};
+use pxfm::{f_cospi, f_cospif, f_i0, f_i0f};
+use std::ops::{AddAssign, Div, Mul, MulAssign, Sub};
 
 mod blackman;
 mod hamming;
 mod hann;
+mod kaiser;
 mod mla;
+mod slepian;
+
+trait WindowSample:
+    Copy
+    + Mul<Output = Self>
+    + Div<Output = Self>
+    + Signed
+    + Sub<Output = Self>
+    + Float
+    + 'static
+    + Trigonometry<Self>
+    + MulAdd<Self, Output = Self>
+    + AddAssign<Self>
+    + Float
+    + MulAssign<Self>
+{
+}
+
+impl WindowSample for f64 {}
+impl WindowSample for f32 {}
 
 /// Pxwindow provides methods to generate common window functions used in signal processing.
 pub struct Pxwindow {}
@@ -69,10 +94,31 @@ impl Pxwindow {
     pub fn blackman_f64(len: usize) -> Vec<f64> {
         blackman_impl(len)
     }
+
+    /// Generates a Slepian window of length `len` in `f32` precision.
+    pub fn slepian_f32(len: usize, nw: f64) -> Vec<f32> {
+        slepian_window(len, nw).iter().map(|x| *x as f32).collect()
+    }
+
+    /// Generates a Slepian window of length `len` in `f64` precision.
+    pub fn slepian_f64(len: usize, nw: f64) -> Vec<f64> {
+        slepian_window(len, nw)
+    }
+
+    /// Generates a Kaiser window of length `len` in `f32` precision.
+    pub fn kaiser_f32(len: usize, beta: f32) -> Vec<f32> {
+        kaiser_impl(len, beta)
+    }
+
+    /// Generates a Slepian window of length `len` in `f64` precision.
+    pub fn kaiser_f64(len: usize, beta: f64) -> Vec<f64> {
+        kaiser_impl(len, beta)
+    }
 }
 
 pub(crate) trait Trigonometry<V> {
     fn cospi(self) -> V;
+    fn i0(self) -> V;
 }
 
 impl Trigonometry<f32> for f32 {
@@ -80,11 +126,21 @@ impl Trigonometry<f32> for f32 {
     fn cospi(self) -> f32 {
         f_cospif(self)
     }
+
+    #[inline(always)]
+    fn i0(self) -> f32 {
+        f_i0f(self)
+    }
 }
 
 impl Trigonometry<f64> for f64 {
     #[inline(always)]
     fn cospi(self) -> f64 {
         f_cospi(self)
+    }
+
+    #[inline(always)]
+    fn i0(self) -> f64 {
+        f_i0(self)
     }
 }
