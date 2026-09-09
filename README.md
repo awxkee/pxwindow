@@ -1,6 +1,7 @@
 # Pxwindow
 
 Generates common window functions.
+Periodic variants for spectral analysis: `Pxwindow::hann_periodic_f32/f64`, `hamming_periodic_*`, `blackman_periodic_*`.
 
 ```rust
 let window = Pxwindow::hann_f32(length);
